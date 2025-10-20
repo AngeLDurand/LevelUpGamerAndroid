@@ -1,7 +1,9 @@
 package com.example.levelupgamer.screens
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -19,6 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.levelupgamer.R
 import com.example.levelupgamer.ui.AppScaffold
 import com.example.levelupgamer.ui.BottomItem
+import com.example.levelupgamer.ui.theme.BrandYellow
+import com.example.levelupgamer.ui.theme.SurfaceDark
 import com.example.levelupgamer.viewmodel.ProductUi
 import com.example.levelupgamer.viewmodel.ProductsViewModel
 
@@ -37,70 +42,75 @@ fun ProductsByCategoryScreen(
         onCartClick = onCartClick
     ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 Text(
                     text = "Productos",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
             items(items, key = { it.id }) { p ->
                 ProductCard(p)
             }
+            item { Spacer(Modifier.height(8.dp)) }
         }
     }
 }
 
 @Composable
 private fun ProductCard(p: ProductUi) {
-    val context = LocalContext.current
+    val ctx = LocalContext.current
 
     // Buscar el drawable por nombre (sin extensión)
     val resId = remember(p.imagenUrl) {
-        val id = context.resources.getIdentifier(p.imagenUrl, "drawable", context.packageName)
+        val id = ctx.resources.getIdentifier(p.imagenUrl, "drawable", ctx.packageName)
         Log.d("IMG", "lookup '${p.imagenUrl}' -> resId=$id")
-        if (id != 0) id else R.drawable.ic_launcher_foreground // fallback local
+        if (id != 0) id else R.drawable.ic_launcher_foreground
     }
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant // 👈 tono más claro
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // sin tinte
+        modifier = Modifier.fillMaxWidth(),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
     ) {
-        Column(Modifier.padding(12.dp)) {
-            Image(
-                painter = painterResource(id = resId),
-                contentDescription = p.titulo,
-                modifier = Modifier
-                    .width(303.dp)
-                    .height(227.25.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .align(Alignment.CenterHorizontally)
+        Column(Modifier.padding(16.dp)) {
 
-            )
+            // Imagen 16:9 con esquinas
+            Surface(
+                color = Color.Black,
+                shape = RoundedCornerShape(12.dp),
+                tonalElevation = 0.dp
+            ) {
+                Image(
+                    painter = painterResource(id = resId),
+                    contentDescription = p.titulo,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+            }
 
             Spacer(Modifier.height(12.dp))
 
             Text(
                 text = p.titulo,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(Modifier.height(6.dp))
-
+            Spacer(Modifier.height(8.dp))
 
             Text(
                 text = formatClp(p.precioClp),
-                style = MaterialTheme.typography.headlineSmall, // más grande
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.titleMedium,
+                color = BrandYellow
             )
 
             Spacer(Modifier.height(12.dp))
@@ -112,15 +122,12 @@ private fun ProductCard(p: ProductUi) {
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,  // tu amarillo
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = BrandYellow,
+                    contentColor = SurfaceDark
                 )
             ) {
                 Text("Agregar al carrito")
             }
-
-            Spacer(Modifier.height(4.dp))
-            HorizontalDivider()
         }
     }
 }

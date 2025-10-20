@@ -54,7 +54,13 @@ fun AppNavHost(navController: NavHostController) {
         composable(NavRoutes.Categories.route) {
             CategoriesScreen(
                 onCartClick = { /* TODO */ },
-                onSelectTab = { /* ... */ },
+                onSelectTab = {
+                    when (it) {
+                        BottomItem.HOME -> actions.goToHome()
+                        BottomItem.CATEGORIES -> actions.goToCategories()
+                        BottomItem.ACCOUNT -> actions.goToAccount()
+                    }
+                },
                 onCategoryClick = { slug ->
                     navController.navigate(NavRoutes.ProductsByCategory.build(slug))
                 }

@@ -3,12 +3,13 @@ package com.example.levelupgamer.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Logout
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +28,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.levelupgamer.ui.AppScaffold
 import com.example.levelupgamer.ui.BottomItem
+import com.example.levelupgamer.ui.theme.BrandYellow
+import com.example.levelupgamer.ui.theme.SurfaceDark
 import com.example.levelupgamer.viewmodel.AccountViewModel
 import com.example.levelupgamer.viewmodel.CompraUi
 
@@ -33,12 +37,11 @@ import com.example.levelupgamer.viewmodel.CompraUi
 fun AccountScreen(
     onCartClick: () -> Unit = {},
     onSelectTab: (BottomItem) -> Unit,
-    onLogout: () -> Unit = {} // navegar a Welcome
+    onLogout: () -> Unit = {}
 ) {
     val vm: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
     val ui by vm.ui.collectAsState()
 
-    // Solo galería (Photo Picker)
     val pickPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri -> vm.setFoto(uri) }
@@ -56,86 +59,177 @@ fun AccountScreen(
         }
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Título local de la pantalla
+            // Título
             item {
                 Text(
                     "Mi cuenta",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-                Spacer(Modifier.height(12.dp))
             }
 
-            // Foto + datos
+            // Card de Perfil (avatar + nombre + email + cambiar foto)
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ProfileAvatar(
-                        photo = ui.fotoPerfil,
-                        onClick = {
-                            pickPhotoLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(ui.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        Text(ui.email, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
-                        TextButton(onClick = {
-                            pickPhotoLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }) {
-                            Icon(Icons.Outlined.Image, contentDescription = null)
-                            Spacer(Modifier.width(6.dp))
-                            Text("Cambiar foto")
-                        }
+                ProfileCard(
+                    nombre = ui.nombre,
+                    email = ui.email,
+                    photo = ui.fotoPerfil,
+                    onChangePhoto = {
+                        pickPhotoLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
                     }
-                }
+                )
             }
 
-            // Información personal
+            // Card 1: Información personal
             item {
-                SectionHeader("Información personal")
-                ListItem(headlineContent = { Text("Nombre") }, supportingContent = { Text(ui.nombre) })
-                ListItem(headlineContent = { Text("Correo") }, supportingContent = { Text(ui.email) })
-                Divider()
-                Spacer(Modifier.height(8.dp))
+                PersonalInfoCard(
+                    nombre = ui.nombre,
+                    email = ui.email
+                )
             }
 
-            // Compras
-            item { SectionHeader("Compras") }
-            items(ui.compras, key = { it.id }) { compra ->
-                CompraItem(compra)
-            }
-
-            // Cerrar sesión
+            // Card 2: Compras
             item {
-                Spacer(Modifier.height(20.dp))
+                PurchasesCard(compras = ui.compras)
+            }
+
+            // Botón cerrar sesión
+            item {
                 Button(
                     onClick = { vm.logout(onLogout) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrandYellow,
+                        contentColor = SurfaceDark
+                    )
                 ) {
                     Icon(Icons.Outlined.Logout, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Cerrar sesión")
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
+
+/* =====================  Cards  ===================== */
+
+@Composable
+private fun ProfileCard(
+    nombre: String,
+    email: String,
+    photo: android.net.Uri?,
+    onChangePhoto: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+        elevation = CardDefaults.cardElevation(0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ProfileAvatar(photo = photo, onClick = onChangePhoto)
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline
+                )
+                TextButton(onClick = onChangePhoto) {
+                    Icon(Icons.Outlined.Image, contentDescription = null, tint = BrandYellow)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Cambiar foto", color = BrandYellow)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PersonalInfoCard(
+    nombre: String,
+    email: String
+) {
+    val cs = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+        elevation = CardDefaults.cardElevation(0.dp),
+        border = BorderStroke(1.dp, cs.onSurface.copy(alpha = 0.06f))
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "Información personal",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = cs.onSurface
+            )
+            Spacer(Modifier.height(8.dp))
+            InfoRow("Nombre", nombre)
+            InfoRow("Correo", email)
+        }
+    }
+}
+
+@Composable
+private fun PurchasesCard(compras: List<CompraUi>) {
+    val cs = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+        elevation = CardDefaults.cardElevation(0.dp),
+        border = BorderStroke(1.dp, cs.onSurface.copy(alpha = 0.06f))
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "Compras",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = cs.onSurface
+            )
+            Spacer(Modifier.height(8.dp))
+
+            if (compras.isEmpty()) {
+                Text("Sin compras registradas", color = cs.outline)
+            } else {
+                compras.forEachIndexed { i, c ->
+                    CompraRow(c)
+                    if (i != compras.lastIndex) {
+                        HorizontalDivider(color = cs.onSurface.copy(alpha = 0.12f))
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* =====================  Subcomponentes  ===================== */
 
 @Composable
 private fun ProfileAvatar(photo: android.net.Uri?, onClick: () -> Unit) {
@@ -143,7 +237,7 @@ private fun ProfileAvatar(photo: android.net.Uri?, onClick: () -> Unit) {
         modifier = Modifier
             .size(84.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(MaterialTheme.colorScheme.surfaceVariant) // más claro dentro de la card
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -168,19 +262,25 @@ private fun ProfileAvatar(photo: android.net.Uri?, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
+private fun InfoRow(label: String, value: String) {
+    Column(Modifier.padding(vertical = 6.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
 
 @Composable
-private fun CompraItem(c: CompraUi) {
-    ListItem(
-        headlineContent = { Text(c.titulo) },
-        supportingContent = { Text("${c.fecha} • Total ${c.total}") }
-    )
-    Divider()
+private fun CompraRow(c: CompraUi) {
+    Column(Modifier.padding(vertical = 6.dp)) {
+        Text(c.titulo, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text("${c.fecha} • Total ${c.total}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+    }
 }
