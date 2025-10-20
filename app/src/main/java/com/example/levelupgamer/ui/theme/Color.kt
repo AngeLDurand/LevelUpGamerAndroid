@@ -2,10 +2,11 @@ package com.example.levelupgamer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Colores brand (gamer + amarillo "warning")
+val BrandYellow = Color(0xFFFFC107)
+val BrandYellowDark = Color(0xFFFFB300)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Bg = Color(0xFF0B0B0B)      // fondo
+val SurfaceDark = Color(0xFF121212)
+val OnDark = Color(0xFFECECEC)   // texto sobre oscuro
+val Muted = Color(0xFFB0B0B0)    // texto secundario
