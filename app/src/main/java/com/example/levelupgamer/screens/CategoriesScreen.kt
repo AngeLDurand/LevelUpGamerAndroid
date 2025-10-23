@@ -20,6 +20,7 @@ import com.example.levelupgamer.viewmodel.CategoryUi
 
 @Composable
 fun CategoriesScreen(
+    cartCount: Int,
     onCartClick: () -> Unit = {},
     onSelectTab: (BottomItem) -> Unit,
     onCategoryClick: (slug: String) -> Unit
@@ -30,7 +31,8 @@ fun CategoriesScreen(
     AppScaffold(
         selected = BottomItem.CATEGORIES,
         onSelect = onSelectTab,
-        onCartClick = onCartClick
+        onCartClick = onCartClick,
+        cartCount = cartCount
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

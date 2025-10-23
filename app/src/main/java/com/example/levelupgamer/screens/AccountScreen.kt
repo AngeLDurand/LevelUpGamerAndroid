@@ -11,8 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,21 +26,44 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.levelupgamer.data.local.AppDatabase
+import com.example.levelupgamer.data.session.SessionPrefs
 import com.example.levelupgamer.ui.AppScaffold
 import com.example.levelupgamer.ui.BottomItem
 import com.example.levelupgamer.ui.theme.BrandYellow
 import com.example.levelupgamer.ui.theme.SurfaceDark
 import com.example.levelupgamer.viewmodel.AccountViewModel
 import com.example.levelupgamer.viewmodel.CompraUi
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 fun AccountScreen(
+    cartCount: Int,
     onCartClick: () -> Unit = {},
     onSelectTab: (BottomItem) -> Unit,
     onLogout: () -> Unit = {}
 ) {
-    val vm: AccountViewModel = viewModel(factory = AccountViewModel.Factory)
+    val ctx = LocalContext.current
+    val db = remember { AppDatabase.getInstance(ctx) }
+    val session = remember { SessionPrefs(ctx) }
+
+    val vm: AccountViewModel = viewModel(
+        factory = AccountViewModel.provideFactory(db, session)
+    )
     val ui by vm.ui.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                vm.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     val pickPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -49,7 +72,8 @@ fun AccountScreen(
     AppScaffold(
         selected = BottomItem.ACCOUNT,
         onSelect = onSelectTab,
-        onCartClick = onCartClick
+        onCartClick = onCartClick,
+        cartCount = cartCount
     ) {
         if (!ui.ready) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -112,7 +136,7 @@ fun AccountScreen(
                         contentColor = SurfaceDark
                     )
                 ) {
-                    Icon(Icons.Outlined.Logout, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Cerrar sesión")
                 }
@@ -237,7 +261,7 @@ private fun ProfileAvatar(photo: android.net.Uri?, onClick: () -> Unit) {
         modifier = Modifier
             .size(84.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant) // más claro dentro de la card
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -284,3 +308,4 @@ private fun CompraRow(c: CompraUi) {
         Text("${c.fecha} • Total ${c.total}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
     }
 }
+

@@ -10,4 +10,6 @@ sealed class NavRoutes(val route: String) {
     data object ProductsByCategory : NavRoutes("products/{slug}") {
         fun build(slug: String) = "products/$slug"
     }
+    data object Cart : NavRoutes("cart")
+    data object PurchaseSuccess : NavRoutes("purchase_success")
 }

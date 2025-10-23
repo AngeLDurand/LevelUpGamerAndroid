@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 
 @Database(
-    entities = [UsuarioEntity::class, CategoryEntity::class, ProductEntity::class],
+    entities = [UsuarioEntity::class, CategoryEntity::class, ProductEntity::class,CompraEntity::class, CompraLineaEntity::class  ],
     version = 1,
     exportSchema = false
 )
@@ -19,6 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     abstract fun categoryDao(): CategoryDao
     abstract fun productDao(): ProductDao
+    abstract fun compraDao(): CompraDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

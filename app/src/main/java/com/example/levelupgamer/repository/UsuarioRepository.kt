@@ -11,7 +11,7 @@ class UsuarioRepository(private val dao: UsuarioDao) {
         dao.insert(UsuarioEntity(nombre = nombre, email = email, pass = pass))
     }
 
-    /** Retorna el usuario si credenciales son válidas; si no, null */
+
     suspend fun login(email: String, pass: String): UsuarioEntity? {
         val u = dao.findByEmail(email) ?: return null
         return if (u.pass == pass) u else null

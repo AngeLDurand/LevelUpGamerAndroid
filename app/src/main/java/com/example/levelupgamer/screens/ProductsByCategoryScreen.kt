@@ -3,14 +3,19 @@ package com.example.levelupgamer.screens
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,8 +35,10 @@ import com.example.levelupgamer.viewmodel.ProductsViewModel
 @Composable
 fun ProductsByCategoryScreen(
     slug: String,
+    cartCount: Int,
     onCartClick: () -> Unit = {},
-    onSelectTab: (BottomItem) -> Unit
+    onSelectTab: (BottomItem) -> Unit,
+    onAddToCart: (Int) -> Unit
 ) {
     val vm: ProductsViewModel = viewModel(factory = ProductsViewModel.Factory(slug))
     val items by vm.items.collectAsState()
@@ -39,7 +46,8 @@ fun ProductsByCategoryScreen(
     AppScaffold(
         selected = BottomItem.CATEGORIES,
         onSelect = onSelectTab,
-        onCartClick = onCartClick
+        onCartClick = onCartClick,
+        cartCount = cartCount
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -53,7 +61,7 @@ fun ProductsByCategoryScreen(
                 )
             }
             items(items, key = { it.id }) { p ->
-                ProductCard(p)
+                ProductCard(p, onAddToCart)
             }
             item { Spacer(Modifier.height(8.dp)) }
         }
@@ -61,7 +69,10 @@ fun ProductsByCategoryScreen(
 }
 
 @Composable
-private fun ProductCard(p: ProductUi) {
+private fun ProductCard(
+    p: ProductUi,
+    onAddToCart: (Int) -> Unit
+) {
     val ctx = LocalContext.current
 
     // Buscar el drawable por nombre (sin extensión)
@@ -74,7 +85,7 @@ private fun ProductCard(p: ProductUi) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // sin tinte
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth(),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
     ) {
@@ -116,7 +127,7 @@ private fun ProductCard(p: ProductUi) {
             Spacer(Modifier.height(12.dp))
 
             Button(
-                onClick = { /* TODO: agregar al carrito */ },
+                onClick = { onAddToCart(p.id) },   // ← agrega al carrito
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),

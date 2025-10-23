@@ -52,7 +52,7 @@ fun WelcomeScreen(
         )
 
         // 3) Capa BLUR sólo en la parte inferior (donde va la card)
-        //    Truco: re-renderizamos la imagen recortada abajo, con blur y un velo extra.
+
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -64,7 +64,7 @@ fun WelcomeScreen(
                 contentDescription = null,
                 modifier = Modifier
                     .matchParentSize()
-                    .blur(22.dp), // ← el blur “frosted”
+                    .blur(22.dp),
                 contentScale = ContentScale.Crop
             )
             // Velo extra para contraste

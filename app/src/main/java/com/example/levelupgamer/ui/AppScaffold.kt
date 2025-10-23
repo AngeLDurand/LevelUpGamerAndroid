@@ -1,3 +1,4 @@
+// ui/AppScaffold.kt
 package com.example.levelupgamer.ui
 
 import androidx.compose.foundation.layout.padding
@@ -13,8 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.levelupgamer.ui.theme.SurfaceDark
 import com.example.levelupgamer.ui.theme.BrandYellow
-import com.example.levelupgamer.ui.theme.OnDark
-
 
 enum class BottomItem { HOME, CATEGORIES, ACCOUNT }
 
@@ -25,46 +24,51 @@ fun AppScaffold(
     selected: BottomItem,
     onSelect: (BottomItem) -> Unit,
     onCartClick: () -> Unit,
+    cartCount: Int = 0,
     content: @Composable () -> Unit
 ) {
     val cs = MaterialTheme.colorScheme
 
     Scaffold(
-        containerColor = cs.background, // ← fondo uniforme
+        containerColor = cs.background,
         topBar = {
             TopAppBar(
                 title = { Text(companyName) },
                 actions = {
-                    IconButton(onClick = onCartClick) {
-                        Icon(Icons.Outlined.ShoppingCart, contentDescription = "Carrito")
+                    BadgedBox(
+                        badge = {
+                            if (cartCount > 0) {
+                                Badge { Text(cartCount.coerceAtMost(99).toString()) }
+                            }
+                        }
+                    ) {
+                        IconButton(onClick = onCartClick) {
+                            Icon(Icons.Outlined.ShoppingCart, contentDescription = "Carrito")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SurfaceDark,      // ← igual que el fondo
+                    containerColor = SurfaceDark,
                     titleContentColor = BrandYellow,
                     actionIconContentColor = cs.onBackground
                 )
             )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = SurfaceDark,
-                tonalElevation = 0.dp
-            ) {
+            NavigationBar(containerColor = SurfaceDark, tonalElevation = 0.dp) {
                 NavigationBarItem(
                     selected = selected == BottomItem.HOME,
                     onClick = { onSelect(BottomItem.HOME) },
                     icon = { Icon(Icons.Outlined.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SurfaceDark,          // icono oscuro
-                        selectedTextColor = BrandYellow,          // texto oscuro
-                        unselectedIconColor = Color(0xFFECECEC),  // gris claro
+                        selectedIconColor = SurfaceDark,
+                        selectedTextColor = BrandYellow,
+                        unselectedIconColor = Color(0xFFECECEC),
                         unselectedTextColor = Color(0xFFECECEC),
-                        indicatorColor = BrandYellow              // círculo amarillo
+                        indicatorColor = BrandYellow
                     )
                 )
-
                 NavigationBarItem(
                     selected = selected == BottomItem.CATEGORIES,
                     onClick = { onSelect(BottomItem.CATEGORIES) },
@@ -78,7 +82,6 @@ fun AppScaffold(
                         indicatorColor = BrandYellow
                     )
                 )
-
                 NavigationBarItem(
                     selected = selected == BottomItem.ACCOUNT,
                     onClick = { onSelect(BottomItem.ACCOUNT) },
@@ -93,19 +96,14 @@ fun AppScaffold(
                     )
                 )
             }
-
         },
-
         content = { inner ->
-            // padding del scaffold + margen base de la app
             Surface(
                 modifier = Modifier
                     .padding(inner)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 color = Color.Transparent
-            ) {
-                content()
-            }
+            ) { content() }
         }
     )
 }

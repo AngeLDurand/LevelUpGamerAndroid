@@ -5,7 +5,11 @@ import androidx.navigation.NavHostController
 class NavActions(private val navController: NavHostController) {
 
     val goToWelcome: () -> Unit = {
-        navController.navigateSingleTop(NavRoutes.Welcome.route)
+
+        navController.navigate(NavRoutes.Welcome.route) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            launchSingleTop = true
+        }
     }
 
     val goToRegister: () -> Unit = {
@@ -17,15 +21,26 @@ class NavActions(private val navController: NavHostController) {
     }
 
     val goToHome: () -> Unit = {
-        navController.navigateSingleTop(NavRoutes.Home.route)
+        navController.navigateSingleTopRestore(
+            route = NavRoutes.Home.route,
+            popUpToRoute = NavRoutes.Home.route
+        )
     }
 
     val goToCategories: () -> Unit = {
-        navController.navigateSingleTop(NavRoutes.Categories.route)
+
+        navController.navigateSingleTopNoRestore(
+            route = NavRoutes.Categories.route,
+            popUpToRoute = NavRoutes.Home.route
+        )
     }
 
+
     val goToAccount: () -> Unit = {
-        navController.navigateSingleTop(NavRoutes.Account.route)
+        navController.navigateSingleTopRestore(
+            route = NavRoutes.Account.route,
+            popUpToRoute = NavRoutes.Home.route
+        )
     }
 
     val goBack: () -> Unit = {
@@ -38,5 +53,23 @@ fun NavHostController.navigateSingleTop(route: String) {
         launchSingleTop = true
         restoreState = true
         popUpTo(graph.startDestinationId) { saveState = true }
+    }
+}
+
+
+fun NavHostController.navigateSingleTopRestore(route: String, popUpToRoute: String) {
+    this.navigate(route) {
+        launchSingleTop = true
+        restoreState = true
+        popUpTo(popUpToRoute) { saveState = true }
+    }
+}
+
+
+fun NavHostController.navigateSingleTopNoRestore(route: String, popUpToRoute: String) {
+    this.navigate(route) {
+        launchSingleTop = true
+
+        popUpTo(popUpToRoute) { saveState = true }
     }
 }

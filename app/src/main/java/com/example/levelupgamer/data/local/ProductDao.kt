@@ -15,4 +15,14 @@ interface ProductDao {
 
     @Query("SELECT COUNT(*) FROM productos")
     suspend fun count(): Int
+
+    @Query("SELECT * FROM productos WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Int): ProductEntity?
+
+    @Query("SELECT * FROM productos WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Int>): List<ProductEntity>
+
+    @Query("SELECT * FROM productos ORDER BY id DESC")
+    suspend fun getAllDesc(): List<ProductEntity>
+
 }

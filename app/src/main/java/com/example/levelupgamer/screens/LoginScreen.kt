@@ -61,7 +61,7 @@ fun LoginScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .imePadding(), // evita que el teclado tape el botón
+                .imePadding(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // 🔹 Formulario (pegado arriba)
